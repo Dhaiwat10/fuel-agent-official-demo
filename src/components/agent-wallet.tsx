@@ -10,10 +10,9 @@ interface Asset {
   balance: string
   icon: string
 }
-
 export function AgentWallet() {
-  const [address, setAddress] = useState('0x1234...5678') // TODO: Generate actual wallet
-  const [assets, setAssets] = useState<Asset[]>([
+  const [address] = useState('0x1234...5678') // TODO: Generate actual wallet
+  const [assets] = useState<Asset[]>([
     { symbol: 'ETH', balance: '0.05', icon: '⧫' },
     { symbol: 'USDC', balance: '100.00', icon: '$' },
     { symbol: 'USDT', balance: '50.00', icon: '$' },
