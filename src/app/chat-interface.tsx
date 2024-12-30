@@ -14,14 +14,29 @@ import {
 } from "@/components/ui/card";
 import { useAgent } from "@/hooks/useAgent";
 import { convertMdToHtml } from "@/lib/md";
+import { ApiKeyDialog } from "@/components/api-key-dialog";
 
 interface Message {
   role: "user" | "assistant";
   content: string | React.ReactNode;
 }
 
-export default function ChatInterface() {
-  const { agent, agentStatus, refetchBalances } = useAgent();
+interface ChatInterfaceProps {
+  showApiKeyDialog: boolean;
+  onApiKeyDialogClose: () => void;
+}
+
+export default function ChatInterface({
+  showApiKeyDialog,
+  onApiKeyDialogClose,
+}: ChatInterfaceProps) {
+  const [openAiApiKey, setOpenAiApiKey] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("openai-api-key") || "";
+    }
+    return "";
+  });
+  const { agent, agentStatus, refetchBalances } = useAgent(openAiApiKey);
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -34,8 +49,7 @@ export default function ChatInterface() {
       setMessages([
         {
           role: "assistant",
-          content:
-            'Hello! I can help you send transactions on Fuel. Try commands like "send 5 USDC to 0x123..." or "show balance"',
+          content: `Hi, I'm an AI agent on Fuel. I can help you interact with Fuel Ignition.\nTry commands like "Send 5 USDC to 0x123..." or "Show my USDC balance"`,
         },
       ]);
     }
@@ -55,10 +69,10 @@ export default function ChatInterface() {
 
     try {
       const { output } = await agent.execute(input);
-      
+
       // Add AI response
       setMessages((prev) => [...prev, { role: "assistant", content: output }]);
-      
+
       // Refresh balances and show loading state
       await refetchBalances();
     } finally {
@@ -82,8 +96,20 @@ export default function ChatInterface() {
     }
   }, [messages, isLoading]);
 
+  const handleApiKeySubmit = (apiKey: string) => {
+    setOpenAiApiKey(apiKey);
+    localStorage.setItem("openai-api-key", apiKey);
+    onApiKeyDialogClose();
+  };
+
   return (
-    <div className="h-[calc(100vh-13rem)] md:h-auto bg-black text-white flex flex-col">
+    <div className="h-[calc(100vh-13rem)] bg-black text-white flex flex-col">
+      <ApiKeyDialog
+        open={showApiKeyDialog}
+        onSubmit={handleApiKeySubmit}
+        onDelete={() => setOpenAiApiKey("")}
+        defaultValue={openAiApiKey}
+      />
       <Card className="flex-grow max-w-2xl mx-auto w-full bg-[#111] border-[#222] text-white flex flex-col">
         <CardHeader className="border-b border-[#222]">
           <CardTitle className="text-2xl font-bold bg-gradient-to-r from-[#00FF94] to-[#00FF94]/70 inline-block text-transparent bg-clip-text">
@@ -142,12 +168,13 @@ export default function ChatInterface() {
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type a command..."
               className="flex-1 bg-[#222] border-[#333] text-white placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-[#00FF94]/20 focus-visible:ring-offset-0"
-              disabled={isLoading || agentStatus === "loading"}
+              disabled={isLoading || agentStatus === "loading" || !openAiApiKey}
             />
             <Button
               type="submit"
               className="bg-[#00FF94] text-black hover:bg-[#00FF94]/90 disabled:opacity-50"
-              disabled={isLoading || agentStatus === "loading"}
+              disabled={isLoading || agentStatus === "loading" || !openAiApiKey}
+              onClick={() => !openAiApiKey && onApiKeyDialogClose()}
             >
               <Send className="h-4 w-4" />
             </Button>

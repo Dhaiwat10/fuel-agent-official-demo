@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useAgentWallet } from "./useAgentWallet";
 import { FuelAgent } from "fuel-agent-kit";
 
-export const useAgent = () => {
+export const useAgent = (openAiApiKey?: string) => {
   const {
     wallet,
     status: walletStatus,
@@ -16,13 +16,13 @@ export const useAgent = () => {
   const [agent, setAgent] = useState<FuelAgent | null>(null);
 
   useEffect(() => {
-    if (!wallet) return;
+    if (!wallet || !openAiApiKey) return;
     setAgentStatus("loading");
     try {
       const agent = new FuelAgent({
         model: "gpt-4o-mini",
         walletPrivateKey: wallet.privateKey,
-        openAiApiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
+        openAiApiKey,
       });
       setAgent(agent);
       setAgentStatus("ready");
@@ -30,7 +30,7 @@ export const useAgent = () => {
       console.error(error);
       setAgentStatus("error");
     }
-  }, [wallet]);
+  }, [wallet, openAiApiKey]);
 
   return {
     wallet,

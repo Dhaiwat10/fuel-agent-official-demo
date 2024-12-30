@@ -1,14 +1,14 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { Copy, Download, ExternalLink, RefreshCcw, Loader2 } from "lucide-react";
+import { Copy, Download, ExternalLink, RefreshCcw, Loader2, Key } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAgent } from "@/hooks/useAgent";
 import { toast } from "@/hooks/use-toast";
 
-export function AgentWallet() {
+export function AgentWallet({ onChangeApiKey }: { onChangeApiKey: () => void }) {
   const {
     wallet,
     walletStatus,
@@ -137,6 +137,15 @@ export function AgentWallet() {
             >
               <RefreshCcw className="h-4 w-4 mr-2" />
               Refresh Balances
+            </Button>
+
+            <Button
+              onClick={onChangeApiKey}
+              variant="outline"
+              className="w-full border-[#333] bg-[#222] hover:bg-[#333] text-[#00FF94] hover:text-[#00FF94]/80"
+            >
+              <Key className="h-4 w-4 mr-2" />
+              Change API Key
             </Button>
 
             <Button

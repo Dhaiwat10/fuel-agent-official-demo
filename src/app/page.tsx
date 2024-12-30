@@ -1,14 +1,20 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import ChatInterface from '@/app/chat-interface'
-import { AgentWallet } from '@/components/agent-wallet'
-import { WelcomeModal } from '@/components/welcome-modal'
-import { CautionNotice } from '@/components/caution-notice'
-import { MobileTabs } from '@/components/mobile-tabs'
+import { useState } from "react";
+import ChatInterface from "@/app/chat-interface";
+import { AgentWallet } from "@/components/agent-wallet";
+import { WelcomeModal } from "@/components/welcome-modal";
+import { CautionNotice } from "@/components/caution-notice";
+import { MobileTabs } from "@/components/mobile-tabs";
 
 export default function Page() {
-  const [activeTab, setActiveTab] = useState<'chat' | 'wallet'>('chat')
+  const [activeTab, setActiveTab] = useState<"chat" | "wallet">("chat");
+  const [showApiKeyDialog, setShowApiKeyDialog] = useState(() => {
+    if (typeof window !== "undefined") {
+      return !localStorage.getItem("openai-api-key");
+    }
+    return true;
+  });
 
   return (
     <div className="min-h-screen bg-black p-4 pb-20 md:pb-4">
@@ -16,18 +22,23 @@ export default function Page() {
       <div className="max-w-6xl mx-auto space-y-4">
         <CautionNotice />
         <div className="grid md:grid-cols-[1fr_300px] gap-8">
-          <div className={`${activeTab === 'chat' ? 'block' : 'hidden md:block'}`}>
-            <ChatInterface />
+          <div
+            className={`${activeTab === "chat" ? "block" : "hidden md:block"}`}
+          >
+            <ChatInterface showApiKeyDialog={showApiKeyDialog} onApiKeyDialogClose={() => setShowApiKeyDialog(false)} />
           </div>
-          <div className={`${activeTab === 'wallet' ? 'block' : 'hidden md:block'}`}>
+          <div
+            className={`${
+              activeTab === "wallet" ? "block" : "hidden md:block"
+            }`}
+          >
             <div className="md:sticky md:top-4">
-              <AgentWallet />
+              <AgentWallet onChangeApiKey={() => setShowApiKeyDialog(true)} />
             </div>
           </div>
         </div>
       </div>
       <MobileTabs activeTab={activeTab} onTabChange={setActiveTab} />
     </div>
-  )
+  );
 }
-
