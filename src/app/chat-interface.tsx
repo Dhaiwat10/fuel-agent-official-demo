@@ -12,6 +12,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useAgent } from "@/hooks/useAgent";
+import { convertMdToHtml } from "@/lib/md";
 
 interface Message {
   role: "user" | "assistant";
@@ -19,36 +21,45 @@ interface Message {
 }
 
 export default function ChatInterface() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: "assistant",
-      content:
-        'Hello! I can help you send transactions on Fuel. Try commands like "send 5 USDC to 0x123..." or "show balance"',
-    },
-  ]);
+  const { agent, agentStatus, refetchBalances } = useAgent();
+
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    if (agentStatus === "ready" && messages.length === 0) {
+      setMessages([
+        {
+          role: "assistant",
+          content:
+            'Hello! I can help you send transactions on Fuel. Try commands like "send 5 USDC to 0x123..." or "show balance"',
+        },
+      ]);
+    }
+  }, [agentStatus, messages.length]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!input.trim() || isLoading) return;
+
+    if (!agent) return;
 
     // Add user message
     setMessages((prev) => [...prev, { role: "user", content: input }]);
     setInput("");
     setIsLoading(true);
 
-    const response = await fetch("/api/execute", {
-      method: "POST",
-      body: JSON.stringify({ command: input }),
-    });
-    const data = await response.json();
+    const { output } = await agent.execute(input);
 
     // Simulate AI processing
-    setMessages((prev) => [...prev, { role: "assistant", content: data.message }]);
+    setMessages((prev) => [...prev, { role: "assistant", content: output }]);
     setIsLoading(false);
+
+    refetchBalances();
   };
 
   useEffect(() => {
@@ -76,7 +87,7 @@ export default function ChatInterface() {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-4 flex-grow overflow-hidden">
-          <ScrollArea className="h-full pr-4" ref={scrollAreaRef}>
+          <ScrollArea className="h-full" ref={scrollAreaRef}>
             <div className="space-y-4">
               {messages.map((message, i) => (
                 <div
@@ -86,22 +97,32 @@ export default function ChatInterface() {
                   }`}
                 >
                   <div
-                    className={`rounded-lg px-4 py-2 max-w-[80%] ${
+                    className={`rounded-lg px-4 py-2 max-w-[80%] break-words ${
                       message.role === "user"
                         ? "bg-[#00FF94] text-black"
                         : "bg-[#222] text-white"
                     }`}
                   >
-                    {message.content}
+                    {typeof message.content === "string" ? (
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: convertMdToHtml(message.content),
+                        }}
+                      />
+                    ) : (
+                      message.content
+                    )}
                   </div>
                 </div>
               ))}
-              {isLoading && (
+              {(isLoading || agentStatus === "loading") && (
                 <div className="flex justify-start">
                   <div className="bg-[#222] text-white rounded-lg px-4 py-2 max-w-[80%] flex items-center gap-2">
                     <Loader2 className="h-4 w-4 text-[#00FF94] animate-spin" />
                     <span className="text-sm text-gray-400">
-                      Processing transaction...
+                      {agentStatus === "loading"
+                        ? "Initializing agent..."
+                        : "Processing transaction..."}
                     </span>
                   </div>
                 </div>
@@ -117,12 +138,12 @@ export default function ChatInterface() {
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type a command..."
               className="flex-1 bg-[#222] border-[#333] text-white placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-[#00FF94]/20 focus-visible:ring-offset-0"
-              disabled={isLoading}
+              disabled={isLoading || agentStatus === "loading"}
             />
             <Button
               type="submit"
               className="bg-[#00FF94] text-black hover:bg-[#00FF94]/90 disabled:opacity-50"
-              disabled={isLoading}
+              disabled={isLoading || agentStatus === "loading"}
             >
               <Send className="h-4 w-4" />
             </Button>
