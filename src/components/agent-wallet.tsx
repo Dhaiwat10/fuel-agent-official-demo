@@ -97,31 +97,37 @@ export function AgentWallet({ onChangeApiKey }: { onChangeApiKey: () => void }) 
             <div className="space-y-2">
               <div className="text-sm text-gray-400">Balances</div>
               <div className="space-y-2">
-                {assets.map((asset) => (
-                  <div
-                    key={asset.symbol}
-                    className="flex justify-between items-center"
-                  >
-                    <div className="flex items-center gap-2">
-                      <img
-                        src={asset.icon}
-                        alt={asset.symbol}
-                        className="h-4 w-4"
-                      />
-                      <span>{asset.symbol}</span>
+                {assets.length > 0 ? (
+                  assets.map((asset) => (
+                    <div
+                      key={asset.symbol}
+                      className="flex justify-between items-center"
+                    >
+                      <div className="flex items-center gap-2">
+                        <img
+                          src={asset.icon}
+                          alt={asset.symbol}
+                          className="h-4 w-4"
+                        />
+                        <span>{asset.symbol}</span>
+                      </div>
+                      <div className="text-[#00FF94] font-medium">
+                        {balanceStatus === "loading" ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          asset.balance.format({
+                            units: asset.decimals,
+                            precision: 5,
+                          })
+                        )}
+                      </div>
                     </div>
-                    <div className="text-[#00FF94] font-medium">
-                      {balanceStatus === "loading" ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        asset.balance.format({
-                          units: asset.decimals,
-                          precision: 5,
-                        })
-                      )}
-                    </div>
+                  ))
+                ) : (
+                  <div className="text-xs text-white py-1">
+                    No balance. Start by adding some funds to this wallet.
                   </div>
-                ))}
+                )}
               </div>
             </div>
 
