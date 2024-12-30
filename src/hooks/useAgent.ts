@@ -8,11 +8,12 @@ export const useAgent = () => {
     status: walletStatus,
     balances,
     refetchBalances,
+    balanceStatus,
   } = useAgentWallet();
   const [agentStatus, setAgentStatus] = useState<"loading" | "ready" | "error">(
     "loading"
   );
-  const [agent, setAgent] = useState<FuelAgent>();
+  const [agent, setAgent] = useState<FuelAgent | null>(null);
 
   useEffect(() => {
     if (!wallet) return;
@@ -38,5 +39,6 @@ export const useAgent = () => {
     agent,
     balances,
     refetchBalances,
+    balanceStatus,
   };
 };

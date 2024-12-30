@@ -53,13 +53,17 @@ export default function ChatInterface() {
     setInput("");
     setIsLoading(true);
 
-    const { output } = await agent.execute(input);
-
-    // Simulate AI processing
-    setMessages((prev) => [...prev, { role: "assistant", content: output }]);
-    setIsLoading(false);
-
-    await refetchBalances();
+    try {
+      const { output } = await agent.execute(input);
+      
+      // Add AI response
+      setMessages((prev) => [...prev, { role: "assistant", content: output }]);
+      
+      // Refresh balances and show loading state
+      await refetchBalances();
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -79,7 +83,7 @@ export default function ChatInterface() {
   }, [messages, isLoading]);
 
   return (
-    <div className="h-[calc(100vh-8rem)] md:h-auto bg-black text-white flex flex-col">
+    <div className="h-[calc(100vh-13rem)] md:h-auto bg-black text-white flex flex-col">
       <Card className="flex-grow max-w-2xl mx-auto w-full bg-[#111] border-[#222] text-white flex flex-col">
         <CardHeader className="border-b border-[#222]">
           <CardTitle className="text-2xl font-bold bg-gradient-to-r from-[#00FF94] to-[#00FF94]/70 inline-block text-transparent bg-clip-text">

@@ -1,11 +1,12 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { Copy, Download, ExternalLink, RefreshCcw } from "lucide-react";
+import { Copy, Download, ExternalLink, RefreshCcw, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAgent } from "@/hooks/useAgent";
+import { toast } from "@/hooks/use-toast";
 
 export function AgentWallet() {
   const {
@@ -13,6 +14,7 @@ export function AgentWallet() {
     walletStatus,
     balances: assets,
     refetchBalances,
+    balanceStatus
   } = useAgent();
   const address = wallet?.address.toB256();
 
@@ -20,11 +22,17 @@ export function AgentWallet() {
     if (!wallet) return;
     const privateKey = wallet.privateKey;
     navigator.clipboard.writeText(privateKey);
+    toast({
+      title: "Private key copied to clipboard",
+    });
   };
 
   const copyAddress = () => {
     if (!address) return;
     navigator.clipboard.writeText(address);
+    toast({
+      title: "Address copied to clipboard",
+    });
   };
 
   return (
@@ -103,10 +111,14 @@ export function AgentWallet() {
                       <span>{asset.symbol}</span>
                     </div>
                     <div className="text-[#00FF94] font-medium">
-                      {asset.balance.format({
-                        units: asset.decimals,
-                        precision: 5,
-                      })}
+                      {balanceStatus === "loading" ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        asset.balance.format({
+                          units: asset.decimals,
+                          precision: 5,
+                        })
+                      )}
                     </div>
                   </div>
                 ))}
@@ -114,9 +126,14 @@ export function AgentWallet() {
             </div>
 
             <Button
-              onClick={refetchBalances}
+              onClick={() => {
+                refetchBalances();
+                toast({
+                  title: "Balances refreshed",
+                });
+              }}
               variant="outline"
-              className="w-full border-[#333] bg-[#222] hover:bg-[#333] text-[#00FF94]"
+              className="w-full border-[#333] bg-[#222] hover:bg-[#333] text-[#00FF94] hover:text-[#00FF94]/80"
             >
               <RefreshCcw className="h-4 w-4 mr-2" />
               Refresh Balances
@@ -125,7 +142,7 @@ export function AgentWallet() {
             <Button
               onClick={exportPrivateKey}
               variant="outline"
-              className="w-full border-[#333] bg-[#222] hover:bg-[#333] text-[#00FF94]"
+              className="w-full border-[#333] bg-[#222] hover:bg-[#333] text-[#00FF94] hover:text-[#00FF94]/80"
             >
               <Download className="h-4 w-4 mr-2" />
               Export Private Key

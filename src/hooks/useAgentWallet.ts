@@ -16,7 +16,7 @@ const getPrivateKey = () => {
 export const useAgentWallet = () => {
   const [wallet, setWallet] = useState<WalletUnlocked>();
   const [status, setStatus] = useState<"loading" | "ready">("loading");
-  const { balances, refetch: refetchBalances } = useBalances(wallet);
+  const { balances, refetch: refetchBalances, status: balanceStatus } = useBalances(wallet);
 
   useAsync(async () => {
     const privateKey = getPrivateKey();
@@ -46,5 +46,6 @@ export const useAgentWallet = () => {
     status,
     balances,
     refetchBalances,
+    balanceStatus
   };
 };
