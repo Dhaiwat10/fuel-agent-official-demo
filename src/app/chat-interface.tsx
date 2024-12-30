@@ -59,7 +59,7 @@ export default function ChatInterface() {
     setMessages((prev) => [...prev, { role: "assistant", content: output }]);
     setIsLoading(false);
 
-    refetchBalances();
+    await refetchBalances();
   };
 
   useEffect(() => {
