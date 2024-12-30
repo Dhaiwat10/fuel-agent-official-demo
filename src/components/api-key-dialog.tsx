@@ -115,7 +115,7 @@ export function ApiKeyDialog({
         <DialogFooter className="flex-col gap-2">
           <Button
             onClick={() => onSubmit(apiKey)}
-            disabled={!apiKey.startsWith("sk-")}
+            disabled={!apiKey}
             className="w-full bg-[#00FF94] text-black hover:bg-[#00FF94]/90"
           >
             <Key className="w-4 h-4 mr-2" />
