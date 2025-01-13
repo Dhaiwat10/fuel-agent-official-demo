@@ -103,7 +103,7 @@ export default function ChatInterface({
   };
 
   return (
-    <div className="h-[calc(100vh-13rem)] bg-black text-white flex flex-col">
+    <div className="h-[calc(100vh-25rem)] bg-black text-white flex flex-col">
       <ApiKeyDialog
         open={showApiKeyDialog}
         onSubmit={handleApiKeySubmit}
@@ -117,7 +117,7 @@ export default function ChatInterface({
           </CardTitle>
         </CardHeader>
         <CardContent className="p-4 flex-grow overflow-hidden">
-          <ScrollArea className="h-full" ref={scrollAreaRef}>
+          <ScrollArea className="max-h-[calc(100vh-25rem)]" ref={scrollAreaRef}>
             <div className="space-y-4">
               {messages.map((message, i) => (
                 <div
