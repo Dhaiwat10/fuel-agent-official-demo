@@ -13,8 +13,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useAgent } from "@/hooks/useAgent";
-import { convertMdToHtml } from "@/lib/md";
 import { ApiKeyDialog } from "@/components/api-key-dialog";
+import { toast } from "@/hooks/use-toast";
+import Markdown from "react-markdown";
 
 interface Message {
   role: "user" | "assistant";
@@ -75,6 +76,14 @@ export default function ChatInterface({
 
       // Refresh balances and show loading state
       await refetchBalances();
+    } catch (err) {
+      console.error(err);
+      toast({
+        title: "Request failed",
+        description:
+          "Please make sure your API key is correct, and that you have not run out of tokens.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -103,7 +112,7 @@ export default function ChatInterface({
   };
 
   return (
-    <div className="h-[calc(100vh-25rem)] bg-black text-white flex flex-col">
+    <div className="h-[calc(100vh-35rem)] bg-black text-white flex flex-col">
       <ApiKeyDialog
         open={showApiKeyDialog}
         onSubmit={handleApiKeySubmit}
@@ -134,11 +143,13 @@ export default function ChatInterface({
                     }`}
                   >
                     {typeof message.content === "string" ? (
-                      <div
-                        dangerouslySetInnerHTML={{
-                          __html: convertMdToHtml(message.content),
-                        }}
-                      />
+                      <Markdown
+                        className={`${
+                          message.role === "assistant" && "prose prose-invert"
+                        }`}
+                      >
+                        {message.content}
+                      </Markdown>
                     ) : (
                       message.content
                     )}
@@ -152,7 +163,7 @@ export default function ChatInterface({
                     <span className="text-sm text-gray-400">
                       {agentStatus === "loading"
                         ? "Initializing agent..."
-                        : "Processing transaction..."}
+                        : "Processing..."}
                     </span>
                   </div>
                 </div>
@@ -161,18 +172,23 @@ export default function ChatInterface({
           </ScrollArea>
         </CardContent>
         <CardFooter className="border-t border-[#222] p-4">
-          <form onSubmit={handleSubmit} className="flex w-full gap-2">
+          <form onSubmit={handleSubmit} className="flex w-full gap-2 items-center">
             <Input
               ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type a command..."
-              className="flex-1 bg-[#222] border-[#333] text-white placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-[#00FF94]/20 focus-visible:ring-offset-0"
-              disabled={isLoading || agentStatus === "loading" || !openAiApiKey}
+              className="flex-1 bg-[#222] border-[#333] text-white placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-[#00FF94]/20 focus-visible:ring-offset-0 py-6"
+              disabled={
+                isLoading ||
+                agentStatus === "loading" ||
+                !openAiApiKey ||
+                !agent
+              }
             />
             <Button
               type="submit"
-              className="bg-[#00FF94] text-black hover:bg-[#00FF94]/90 disabled:opacity-50"
+              className="bg-[#00FF94] text-black hover:bg-[#00FF94]/90 disabled:opacity-50 py-6"
               disabled={isLoading || agentStatus === "loading" || !openAiApiKey}
               onClick={() => !openAiApiKey && onApiKeyDialogClose()}
             >

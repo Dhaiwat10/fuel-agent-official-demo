@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Key, Eye, EyeOff, Copy, Check } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import Link from "next/link";
 
 interface ApiKeyDialogProps {
   open: boolean;
@@ -66,8 +67,19 @@ export function ApiKeyDialog({
         <DialogHeader>
           <DialogTitle>Enter OpenAI API Key</DialogTitle>
           <DialogDescription>
-            Your API key is required to use the AI agent. The key is stored
-            locally and never sent to our servers.
+            An OpenAI API key is required to use the AI agent. The agent uses
+            the OpenAI API to generate responses. The key is stored locally and
+            never sent to our servers.
+            <br />
+            <br />
+            Don&apos;t have an API key?{" "}
+            <Link
+              href="https://platform.openai.com/docs/overview"
+              target="_blank"
+              className="text-[#00FF94] underline decoration-dashed underline-offset-4"
+            >
+              Get API Key
+            </Link>
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
@@ -110,6 +122,13 @@ export function ApiKeyDialog({
                 </Button>
               </div>
             </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <p className="text-sm text-[#888]">
+              This demo is currently in alpha. In future versions, having an API
+              key will not be a requirement.
+            </p>
           </div>
         </div>
         <DialogFooter className="flex-col gap-2">
