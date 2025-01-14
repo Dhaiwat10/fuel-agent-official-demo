@@ -8,6 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -16,6 +17,7 @@ import { useAgent } from "@/hooks/useAgent";
 import { ApiKeyDialog } from "@/components/api-key-dialog";
 import { toast } from "@/hooks/use-toast";
 import Markdown from "react-markdown";
+import Link from "next/link";
 
 interface Message {
   role: "user" | "assistant";
@@ -50,7 +52,13 @@ export default function ChatInterface({
       setMessages([
         {
           role: "assistant",
-          content: `Hi, I'm an AI agent on Fuel. I can help you interact with Fuel Ignition.\nTry commands like "Send 5 USDC to 0x123..." or "Show my USDC balance"`,
+          content: `Hi, I'm an AI agent on Fuel. I can help you interact with Fuel Ignition.
+          \nHere are some things I can do:
+          \n- Transfer assets
+          \n- Check Balances
+          \n- Swap assets on Mira
+          \n- Add liquidity on Mira
+          \n- Supply collateral and Lend assets on Swaylend`,
         },
       ]);
     }
@@ -73,9 +81,6 @@ export default function ChatInterface({
 
       // Add AI response
       setMessages((prev) => [...prev, { role: "assistant", content: output }]);
-
-      // Refresh balances and show loading state
-      await refetchBalances();
     } catch (err) {
       console.error(err);
       toast({
@@ -86,6 +91,7 @@ export default function ChatInterface({
       });
     } finally {
       setIsLoading(false);
+      await refetchBalances();
     }
   };
 
@@ -124,6 +130,25 @@ export default function ChatInterface({
           <CardTitle className="text-2xl font-bold bg-gradient-to-r from-[#00FF94] to-[#00FF94]/70 inline-block text-transparent bg-clip-text">
             Fuel AI Agent
           </CardTitle>
+          <CardDescription>
+            Powered by the{" "}
+            <Link
+              href="https://github.com/fuellabs/fuel-agent-kit"
+              className="transition-colors duration-300 underline decoration-dashed underline-offset-4"
+              target="_blank"
+            >
+              Fuel Agent Kit
+            </Link>
+            . This project is completely{" "}
+            <Link
+              href="https://github.com/dhaiwat10/fuel-agent-official-demo"
+              className="transition-colors duration-300 underline decoration-dashed underline-offset-4"
+              target="_blank"
+            >
+              open source
+            </Link>
+            .
+          </CardDescription>
         </CardHeader>
         <CardContent className="p-4 flex-grow overflow-hidden">
           <ScrollArea className="max-h-[calc(100vh-25rem)]" ref={scrollAreaRef}>
@@ -172,7 +197,10 @@ export default function ChatInterface({
           </ScrollArea>
         </CardContent>
         <CardFooter className="border-t border-[#222] p-4">
-          <form onSubmit={handleSubmit} className="flex w-full gap-2 items-center">
+          <form
+            onSubmit={handleSubmit}
+            className="flex w-full gap-2 items-center"
+          >
             <Input
               ref={inputRef}
               value={input}
